@@ -6,12 +6,14 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author amit
  */
 @Configuration
 @EnableCaching
+@Import(value = {RedisCacheProviderConfiguration.class})
 public class SpringCacheConfiguration {
 
     /**
