@@ -13,6 +13,8 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
+import java.time.Duration;
+
 /**
  * @author amit
  */
@@ -47,17 +49,39 @@ public class RedisCacheProviderConfiguration {
     public CacheManager redisCacheManager(final RedisConnectionFactory redisConnectionFactory) {
         // RedisCacheConfiguration is used to customize redis cache behaviour, for now will use defaults.
         // just setting value serializer because u one is binary
-        final RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration
-                .defaultCacheConfig()
-                .serializeValuesWith(RedisSerializationContext
-                        .SerializationPair.fromSerializer(RedisSerializer.json())
-                );
+        RedisCacheConfiguration cacheConfiguration = getRedisCacheConfiguration();
 
         // create actual RedisCacheManager using RedisConnectionFactory and configuration.
         return RedisCacheManager.RedisCacheManagerBuilder
                 .fromConnectionFactory(redisConnectionFactory)
                 .cacheDefaults(cacheConfiguration)
                 .build();
+    }
+
+    private RedisCacheConfiguration getRedisCacheConfiguration() {
+        // this class is immutable, so we need to cache return value every time we set configuration.
+        RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig();
+
+        // we can restrict from saving null value to cache. Will throw Exception for null value.
+        cacheConfiguration = cacheConfiguration.disableCachingNullValues();
+
+        // we can add prefix to cache keys based on cacheName. Here I am adding no prefix
+        //cacheConfiguration = cacheConfiguration.computePrefixWith(cacheName -> "");
+
+        /*
+         By default, spring add cacheName as a prefix to all keys stored in that cacheName, we can disable all
+         cache prefix by setting this configuration
+        */
+        //cacheConfiguration.disableKeyPrefix();
+
+        // we can set expiry to cache entry. But it will be applied to all cacheNames.
+        cacheConfiguration = cacheConfiguration.entryTtl(Duration.ofMinutes(5));
+
+        // Set value serializer
+        cacheConfiguration = cacheConfiguration.serializeValuesWith(RedisSerializationContext
+                .SerializationPair.fromSerializer(RedisSerializer.json())
+        );
+        return cacheConfiguration;
     }
 }
 
