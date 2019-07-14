@@ -18,6 +18,7 @@
         <java.version>11</java.version>
         <lettuce.version>5.1.7.RELEASE</lettuce.version>
         <spring-data-version>Lovelace-SR9</spring-data-version>
+        <jackson.version>2.9.9</jackson.version>
     </properties>
 
 
@@ -145,6 +146,19 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
+        </dependency>
+
+        <!-- requied for redis value serialization into json -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 

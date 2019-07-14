@@ -50,8 +50,7 @@ public class RedisCacheProviderConfiguration {
         final RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration
                 .defaultCacheConfig()
                 .serializeValuesWith(RedisSerializationContext
-                        .SerializationPair
-                        .fromSerializer(RedisSerializer.json())
+                        .SerializationPair.fromSerializer(RedisSerializer.json())
                 );
 
         // create actual RedisCacheManager using RedisConnectionFactory and configuration.
