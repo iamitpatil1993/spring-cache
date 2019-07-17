@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @EnableCaching
-@Import(value = {RedisCacheProviderConfiguration.class})
+@Import(value = {RedisCacheProviderConfiguration.class, EhcacheCacheProviderConfiguration.class})
 public class SpringCacheConfiguration {
 
     /**
