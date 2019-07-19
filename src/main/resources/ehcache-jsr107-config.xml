@@ -1,0 +1,35 @@
+<config
+        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns='http://www.ehcache.org/v3' xmlns:jsr107="http://www.ehcache.org/v3/jsr107"
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core.xsd">
+
+    <!-- This service enables Mbean for Ehcache which can be used for monitoring using tools like jconsole-->
+    <!-- enables MBeans for JCache for all caches-->
+    <service>
+        <jsr107:defaults enable-management="true" enable-statistics="true"/>
+    </service>
+
+    <cache alias="basicTestCache">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.lang.String</value-type>
+
+        <!-- order of elements matter here in cache element, this expiry element must be before resources element-->
+        <expiry>
+            <ttl unit="seconds">10</ttl>
+        </expiry>
+        <resources>
+            <heap>50</heap>
+        </resources>
+        <!-- We can enable/disable (Override) MBeans for JCache at two levels, per cache level or applicable to all caches.-->
+        <jsr107:mbeans enable-management="false" enable-statistics="false"/>
+    </cache>
+
+    <cache alias="employee">
+        <key-type>java.lang.String</key-type>
+        <value-type>com.example.spring.cahce.ehcache.Employee</value-type>
+        <resources>
+            <heap unit="entries">5</heap>
+            <offheap unit="MB">5</offheap> <!-- ofheap configuration-->
+        </resources>
+    </cache>
+</config>
