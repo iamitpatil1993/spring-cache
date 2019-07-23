@@ -21,6 +21,7 @@
         <jackson.version>2.9.9</jackson.version>
         <postgresql.version>42.2.6</postgresql.version>
         <mysql-connector-java.version>8.0.16</mysql-connector-java.version>
+        <datasource.hikaricp.version>3.3.1</datasource.hikaricp.version>
     </properties>
 
 
@@ -202,6 +203,14 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
+
+        <!-- DataSource Connection pool -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${datasource.hikaricp.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

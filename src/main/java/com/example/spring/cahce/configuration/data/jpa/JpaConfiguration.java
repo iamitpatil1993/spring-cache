@@ -1,16 +1,22 @@
 package com.example.spring.cahce.configuration.data.jpa;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.jpa.AbstractEntityManagerFactoryBean;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalEntityManagerFactoryBean;
+import org.springframework.orm.jpa.*;
+import org.springframework.orm.jpa.vendor.Database;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.sql.DataSource;
 
 /**
  * @author amit
@@ -20,6 +26,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = {"com.example.spring.cahce.repository"})
 public class JpaConfiguration {
+
+    @Autowired
+    private Environment environment;
 
     /**
      * Additional name since, EnableJpaRepositories search for bean with 'entityManagerFactory' name
@@ -56,4 +65,63 @@ public class JpaConfiguration {
         return jpaTransactionManager;
     }
 
+    /**
+     * Define vendor adaptor for LocalContainerEntityManagerFactory
+     * @return
+     */
+    @Bean
+    @Profile(value = {"int", "prod"})
+    public JpaVendorAdapter hibernateJpaVendorAdapter() {
+        HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
+        jpaVendorAdapter.setDatabase(Database.MYSQL);
+        jpaVendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL57Dialect");
+        jpaVendorAdapter.setGenerateDdl(true);
+        jpaVendorAdapter.setShowSql(true);
+
+        return jpaVendorAdapter;
+    }
+
+    /**
+     * Define container managed DataSource which we will pass to LocalContainerEntityManagerFactory
+     *
+     * @return
+     */
+    @Bean
+    @Profile(value = {"int", "prod"})
+    public DataSource hikariCpDataSource() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(this.environment.getProperty("datasource.url"));
+        config.setUsername(this.environment.getProperty("DB_USERNAME"));
+        config.setPassword(this.environment.getProperty("DB_PASSWORD"));
+
+        return new HikariDataSource(config);
+    }
+
+    /**
+     * We do not need to use persistence.xml at all. We can programmatically configure everything.
+     * best part about {@link LocalContainerEntityManagerFactoryBean} is we can pass container managed DataSource to it.
+     *
+     * @param dataSource       DataSource to be used
+     * @param jpaVendorAdapter VendorAdaptor that abstracts persistence provider specific configuration/properties.
+     */
+    @Bean(name = {"entityManagerFactory"})
+    @Profile(value = {"int", "prod"})
+    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(final DataSource dataSource,
+                                                                                         final JpaVendorAdapter jpaVendorAdapter) {
+        final LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
+        entityManagerFactoryBean.setDataSource(dataSource);
+
+        // here we are defining completely new persistence unit programmatically.
+        entityManagerFactoryBean.setPersistenceUnitName("my-programmatic-pu");
+
+        /*
+         if we are not using persistence.xml, and not using JPA way of scanning Entities (which scans all classes and
+         jars in classpath, so it takes lot of time for large projects), and we want to use spring entity scanning
+         feature, then we need to provide base packages/classes where to look for entities.
+        */
+        entityManagerFactoryBean.setPackagesToScan("com.example.spring.cahce.model");
+        entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter);
+
+        return entityManagerFactoryBean;
+    }
 }
