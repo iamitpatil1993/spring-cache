@@ -175,10 +175,11 @@
         </dependency>
 
         <!-- Ehcache as a JCache implementation. -->
+        <!-- In order to use Configuration Derivation, updated to latest version -->
         <dependency>
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
-            <version>3.7.1</version>
+            <version>3.8.0</version>
         </dependency>
 
         <!-- This is java specification for cache APIs, defines only contract and no implememtation-->

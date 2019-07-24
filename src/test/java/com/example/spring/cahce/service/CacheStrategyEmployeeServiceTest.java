@@ -26,6 +26,10 @@ public class CacheStrategyEmployeeServiceTest extends BaseTest {
     @Qualifier("read-around")
     private ReadOperation<Employee, Long> readAroundEmployeeReadOperation;
 
+    @Autowired
+    @Qualifier("read-through")
+    private ReadOperation<Employee, Long> readThroughEmployeeReadOperation;
+
 
     @Test
     public void getEmployeeByIdWithCache() {
@@ -42,6 +46,30 @@ public class CacheStrategyEmployeeServiceTest extends BaseTest {
 
         // this time it will return data from cache
         employeeGetResult = employeeService.getEmployeeByIdWithCache(employee.getId(), readAroundEmployeeReadOperation);
+
+        // THEN
+        Assert.assertEquals(true, employeeGetResult.isPresent());
+    }
+
+    /**
+     * test demonstrates READ-THROUGH cache strategy, it passes readThroughEmployeeREadOperation to service as a
+     * strategy
+     */
+    @Test
+    public void getEmployeeByIdWithReadThroughCacheStrategy() {
+        // GIVEN
+        final Employee employee = new Employee();
+        employee.setFirstName("Jon");
+        employee.setLastName("snow");
+
+        employeeRepository.save(employee);
+
+        // WHEN
+        // this time it will hit database
+        Optional<Employee> employeeGetResult = employeeService.getEmployeeByIdWithCache(employee.getId(), readThroughEmployeeReadOperation);
+
+        // this time it will return data from cache
+        employeeGetResult = employeeService.getEmployeeByIdWithCache(employee.getId(), readThroughEmployeeReadOperation);
 
         // THEN
         Assert.assertEquals(true, employeeGetResult.isPresent());

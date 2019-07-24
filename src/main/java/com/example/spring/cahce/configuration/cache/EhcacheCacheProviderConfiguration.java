@@ -1,11 +1,15 @@
 package com.example.spring.cahce.configuration.cache;
 
 import com.example.spring.cahce.ehcache.Employee;
+import com.example.spring.cahce.stragegy.readwritethrough.EmployeeEntityLoaderWriter;
 import org.ehcache.CacheManager;
+import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.jsr107.EhcacheCachingProvider;
 import org.ehcache.xml.XmlConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +28,10 @@ import java.net.URL;
  */
 @Configuration
 public class EhcacheCacheProviderConfiguration {
+
+    @Autowired
+    private EmployeeEntityLoaderWriter employeeEntityLoaderWriter;
+
 
     @Bean
     @Qualifier("programmatic")
@@ -63,6 +71,15 @@ public class EhcacheCacheProviderConfiguration {
      *
      * @return javax CacheManager, which can be used in application code, which will remove dependency on implementation
      * specific APIs in application code.
+     * <p>
+     * NoTE: We can set CacheLoaderWriter in xml configuration file but, ehcache will create instance of that class
+     * and hence we need to provide default constructor in that CacheLoaderWriter implementation, and also we can not
+     * have spring DI there, because instance is created by ehcache.
+     * So, in order to set full spring initialized bean to ehcache, we need to override the configuration set in XML
+     * file, which are doing here.
+     * NOTE: This is called 'Configuration Derivation', which is new feature added in ehcache 3.8.0
+     * refer
+     * <a href = "https://groups.google.com/forum/#!category-topic/ehcache-users/ehcache-jcache-provider/6V6uoMdHtgs">Configuration Derivation</a> <br>
      */
     @Bean
     @Qualifier("jcachexml")
@@ -74,16 +91,25 @@ public class EhcacheCacheProviderConfiguration {
         */
         // if there are multiple cache provider implementations in classpath, we can provider fully qualified class
         // name of cache provider implementation class. In this case 'org.ehcache.jsr107.EhcacheCachingProvider'
-        CachingProvider cachingProvider = Caching.getCachingProvider();
-        try {
-            javax.cache.CacheManager manager = cachingProvider.getCacheManager(
-                    getClass().getResource("/ehcache-jsr107-config.xml").toURI(),
-                    getClass().getClassLoader());
-            return manager;
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return null;
+        final XmlConfiguration xmlConfiguration = new XmlConfiguration(getClass().getResource("/ehcache-jsr107-config.xml"));
+        CacheConfiguration modifiedEmployeeCacheConfiguration = xmlConfiguration.getCacheConfigurations().get("employeeEntityCache");
+
+        // override cache configuration (specific to employee cache) from xml (Set  CacheLoderWriter)
+        modifiedEmployeeCacheConfiguration = modifiedEmployeeCacheConfiguration
+                .derive()
+                .withLoaderWriter(employeeEntityLoaderWriter).build();
+
+        // get updated configuration (at CacheManager level)
+        org.ehcache.config.Configuration modifiedConfiguration = xmlConfiguration
+                .derive()
+                .withCache("employeeEntityCache", modifiedEmployeeCacheConfiguration)
+                .build();
+
+        // get CacheManager (Jcache) with above updated configuration
+        final EhcacheCachingProvider ehcacheCachingProvider = (EhcacheCachingProvider) Caching.getCachingProvider();
+        final javax.cache.CacheManager manager = ehcacheCachingProvider.getCacheManager(ehcacheCachingProvider.getDefaultURI(), modifiedConfiguration);
+
+        return manager;
     }
 
     //@Bean
