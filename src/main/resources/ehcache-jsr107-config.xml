@@ -32,4 +32,12 @@
             <offheap unit="MB">5</offheap> <!-- ofheap configuration-->
         </resources>
     </cache>
+
+    <cache alias="employeeEntityCache">
+        <key-type>java.lang.Long</key-type>
+        <value-type>com.example.spring.cahce.model.Employee</value-type>
+        <resources>
+            <heap unit="entries">100</heap>
+        </resources>
+    </cache>
 </config>
