@@ -63,6 +63,12 @@ public class EmployeeEntityLoaderWriter implements CacheLoaderWriter<Long, Emplo
         return allById.stream().collect(Collectors.toMap(Employee::getId, employee -> employee));
     }
 
+    /**
+     * In order to use write-through/write-behind we must have key available before saving data in database, which is not possible
+     * if we are using database generated primary keys (like IDENTITY, Sequence), so write-through/write-behind is not much
+     * feasible strategy.
+     *
+     */
     @Override
     public void write(Long key, Employee value) throws Exception {
         throw new UnsupportedOperationException("Not implemented");
