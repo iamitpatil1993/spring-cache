@@ -2,6 +2,8 @@ package com.example.spring.cahce.configuration.data.jpa;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +18,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 /**
@@ -107,7 +110,7 @@ public class JpaConfiguration {
     @Bean(name = {"entityManagerFactory"})
     @Profile(value = {"int", "prod"})
     public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(final DataSource dataSource,
-                                                                                         final JpaVendorAdapter jpaVendorAdapter) {
+            final JpaVendorAdapter jpaVendorAdapter, final PersistenceUnitPropertySource persistenceUnitPropertySource) {
         final LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
         entityManagerFactoryBean.setDataSource(dataSource);
 
@@ -121,7 +124,21 @@ public class JpaConfiguration {
         */
         entityManagerFactoryBean.setPackagesToScan("com.example.spring.cahce.model");
         entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter);
+        entityManagerFactoryBean.setJpaPropertyMap(persistenceUnitPropertySource.getPropertyMap());
 
         return entityManagerFactoryBean;
+    }
+
+    /**
+     * Hibernate collects statistics at SessionFactory level. So expose this statistics as a bean so that we should able to use it for
+     * assertions in test cases
+     *
+     * @param entityManagerFactory EntityManagerFactory for which we want to get statistics.
+     * @return Statistics attached to entityManagerFactory
+     */
+    @Bean
+    public Statistics hibernateStats(final EntityManagerFactory entityManagerFactory) {
+        final SessionFactory underlyingSessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
+        return underlyingSessionFactory.getStatistics();
     }
 }

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<persistence xmlns="http://java.sun.com/xml/ns/persistence"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
- http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
-             version="1.0">
-
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.2"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
 
     <persistence-unit name="my-pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- we need to set this in order to entities to cache, as default value is UNSPECIFIED, which is provider
+        specific-->
+        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
 
@@ -22,6 +23,22 @@
 
             <!-- Schema update configuration -->
             <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+            <!-- second level cache configuration -->
+            <!-- enable hibernate second level cache, which is disabled by default -->
+            <property name="hibernate.cache.use_second_level_cache" value="true"/>
+
+            <!-- set cache provider as a ehcache -->
+            <!-- NOTE: factory_class is different than which we use with hibernate-ehcache which is deprecated now-->
+            <property name="hibernate.cache.region.factory_class"
+                      value="org.hibernate.cache.jcache.JCacheRegionFactory"/>
+
+            <!-- set cache provider, this is new configuration, as hibernate second level cache is based on
+            jcache, and we need to set jcache implementation (which is ehcache 3.*) to this configuration-->
+            <property name="hibernate.javax.cache.provider" value="org.ehcache.jsr107.EhcacheCachingProvider"/>
+            
+            <!-- enable hibernate statistics, which are disabled by default -->
+            <property name="hibernate.generate_statistics" value="true"/>
         </properties>
     </persistence-unit>
 

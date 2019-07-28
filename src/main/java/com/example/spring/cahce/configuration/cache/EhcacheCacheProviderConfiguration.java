@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.cache.configuration.MutableConfiguration;
 import javax.cache.expiry.CreatedExpiryPolicy;
@@ -107,9 +108,17 @@ public class EhcacheCacheProviderConfiguration {
 
         // get CacheManager (Jcache) with above updated configuration
         final EhcacheCachingProvider ehcacheCachingProvider = (EhcacheCachingProvider) Caching.getCachingProvider();
-        final javax.cache.CacheManager manager = ehcacheCachingProvider.getCacheManager(ehcacheCachingProvider.getDefaultURI(), modifiedConfiguration);
+        final javax.cache.CacheManager manager;
+        try {
+            manager = ehcacheCachingProvider.getCacheManager(getClass().getResource("/ehcache-jsr107-config.xml").toURI(), modifiedConfiguration);
+            Cache<Long, com.example.spring.cahce.model.Employee> employeeEntityCache = manager
+                    .getCache("employeeEntityCache", Long.class, com.example.spring.cahce.model.Employee.class);
 
-        return manager;
+            return manager;
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     //@Bean

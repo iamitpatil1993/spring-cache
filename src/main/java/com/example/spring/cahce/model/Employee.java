@@ -3,10 +3,7 @@ package com.example.spring.cahce.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author amit
@@ -15,6 +12,7 @@ import javax.persistence.Table;
 @Table(name = "employee")
 @Getter
 @Setter
+@Cacheable // default value is true
 public class Employee extends BaseEntity {
 
     @Basic
