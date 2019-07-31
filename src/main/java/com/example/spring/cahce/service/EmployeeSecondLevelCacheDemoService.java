@@ -27,4 +27,16 @@ public class EmployeeSecondLevelCacheDemoService {
         return employeeRepository.findById(id);
     }
 
+    /**
+     * Entity update operation, first checks entity exists in second level cache, and then update entity and put saves
+     * in database as well as cache.
+     *
+     * @param employee
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Employee updateEmployeeWithSecondLevelCache(final Employee employee) {
+        return employeeRepository.save(employee);
+    }
+
 }
