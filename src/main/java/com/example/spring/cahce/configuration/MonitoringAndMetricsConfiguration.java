@@ -62,7 +62,7 @@ public class MonitoringAndMetricsConfiguration {
         final Map<String, Object> mBeansToRegister = new HashMap<>(1);
 
         // register hibernate stats bean as a mbean
-        mBeansToRegister.put("Hibernate=Statistics", stats);
+        mBeansToRegister.put("com.example.spring.cahce:type=Statistics", stats);
         mBeanExporter.setBeans(mBeansToRegister);
 
         return mBeanExporter;
