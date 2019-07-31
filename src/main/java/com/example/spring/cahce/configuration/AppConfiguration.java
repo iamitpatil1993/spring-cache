@@ -15,7 +15,7 @@ import static org.springframework.context.annotation.ComponentScan.Filter;
  */
 @Configuration
 @ComponentScan(basePackages = {"com.example.spring.cahce"}, excludeFilters = {@Filter(value = Configuration.class)})
-@Import(value = {SpringCacheConfiguration.class, JpaConfiguration.class})
+@Import(value = {SpringCacheConfiguration.class, JpaConfiguration.class, MonitoringAndMetricsConfiguration.class})
 public class AppConfiguration {
     // Nothing to configure here for now
 }
