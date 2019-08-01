@@ -17,7 +17,7 @@ import javax.persistence.Table;
 @Getter
 @Setter
 @Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY) // this will override cache concurrency set globally at PU level.
 // cache with READ_ONLY strategy will restrict update operation on entity.
 public class Configuration extends BaseEntity {
 

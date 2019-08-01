@@ -39,6 +39,9 @@
             
             <!-- enable hibernate statistics, which are disabled by default -->
             <property name="hibernate.generate_statistics" value="true"/>
+
+            <!-- we can use this property to set cache concurrency strategy globally for all entities. -->
+            <property name="hibernate.cache.default_cache_concurrency_strategy" value="read-write"/>
         </properties>
     </persistence-unit>
 
