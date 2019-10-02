@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
+import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -57,5 +58,17 @@ public class SpringCacheConfiguration {
         simpleCacheManager.setCaches(caches);
 
         return simpleCacheManager;
+    }
+
+    /**
+     * Spring provides easy way to disable cache. {@link NoOpCacheManager} implementation of {@link CacheManager}
+     * can be used as a cache provider to disable cache, without single line code change in application.
+     *
+     * @return org.springframework.cache.support.NoOpCacheManager as IMPL of spring {@link CacheManager}
+     */
+    @Bean
+    @Conditional(value = NoOpCacheConditon.class)
+    public CacheManager noOpCacheManager() {
+        return new NoOpCacheManager();
     }
 }
