@@ -22,6 +22,9 @@
 
             <!-- Schema update configuration -->
             <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+            <!-- enable hibernate statistics, which are disabled by default -->
+            <property name="hibernate.generate_statistics" value="true"/>
         </properties>
     </persistence-unit>
 

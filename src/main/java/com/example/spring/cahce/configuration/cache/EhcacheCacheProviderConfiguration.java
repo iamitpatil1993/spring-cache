@@ -11,9 +11,10 @@ import org.ehcache.jsr107.EhcacheCachingProvider;
 import org.ehcache.xml.XmlConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.springframework.cache.ehcache.EhCacheCacheManager;
+import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
+import org.springframework.context.annotation.*;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.cache.Caching;
 import javax.cache.configuration.MutableConfiguration;
@@ -57,7 +58,6 @@ public class EhcacheCacheProviderConfiguration {
      */
     @Bean
     @Qualifier(value = "xml")
-    @Primary
     public CacheManager ehcachNativeXmlCacheManager() {
         final URL myUrl = getClass().getResource("/ehcache.xml");
         final XmlConfiguration xmlConfig = new XmlConfiguration(myUrl);
@@ -142,5 +142,38 @@ public class EhcacheCacheProviderConfiguration {
             e.printStackTrace();
         }
         return null;
+    }
+
+
+    /**
+     * In order to create hCacheCacheManager as spring CacheManager implementation, we need instance of ehcache CacheManager.
+     * Spring provides it's own API to create ehcache CacheManager using xml configuration using simple to use API.
+     * This factory class is a {@link org.springframework.beans.factory.FactoryBean<CacheManager>} for {@link CacheManager}.
+     *
+     * @return ehcache {@link CacheManager}
+     */
+    @Bean
+    @Conditional(EhcacheCacherProviderCondition.class)
+    public EhCacheManagerFactoryBean cacheManagerUsingSpringApi() {
+        EhCacheManagerFactoryBean ehCacheManagerFactoryBean = new EhCacheManagerFactoryBean();
+
+        // provide xml file for ehcache configuration/
+        ehCacheManagerFactoryBean.setConfigLocation(new ClassPathResource("spring-cache-abs-ehcache.xml"));
+
+        // Set this true, so that spring will check for existing cache manager before creating new one.
+        ehCacheManagerFactoryBean.setShared(true);
+
+        return ehCacheManagerFactoryBean;
+    }
+
+    /**
+     * This bean is Spring CacheManager implementation for EhCache. In order to use Ehcache as a backend for caching,
+     * we need to declare spring implementation of CacheManager for ehacache which is EhCacheCacheManager.
+     * @return EhCacheCacheManager as spring CacheManager implementation
+     */
+    @Bean
+    @Conditional(EhcacheCacherProviderCondition.class)
+    public org.springframework.cache.CacheManager ehCacheCacheManager() {
+        return new EhCacheCacheManager(cacheManagerUsingSpringApi().getObject());
     }
 }
