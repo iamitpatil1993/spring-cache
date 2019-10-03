@@ -34,6 +34,10 @@
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
         <level value="TRACE"/> <!-- change this to TRACE to enable value logging -->
     </logger>
+    
+    <logger name="org.springframework.cache">
+        <level value="ERROR"/> <!-- change this to TRACE, spring logs cache hit/miss details -->
+    </logger>
 
 
     <!-- Root Logger -->
