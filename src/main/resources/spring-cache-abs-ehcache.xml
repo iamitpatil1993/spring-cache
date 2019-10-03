@@ -14,4 +14,12 @@
         <persistence strategy="localTempSwap" />
     </cache>
 
+    <cache name="configuration"
+           maxEntriesLocalHeap="10000"
+           eternal="true"
+           transactionalMode="off">
+        <persistence strategy="localTempSwap" />
+    </cache>
+
+
 </ehcache>
