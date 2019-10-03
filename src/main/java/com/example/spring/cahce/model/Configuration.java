@@ -1,6 +1,8 @@
 package com.example.spring.cahce.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Basic;
@@ -13,6 +15,8 @@ import java.io.Serializable;
 @Table(name = "configuration")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Configuration extends BaseEntity implements Serializable {
 
     @Basic

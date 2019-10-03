@@ -2,6 +2,7 @@ package com.example.spring.cahce.repository;
 
 import com.example.spring.cahce.BaseTest;
 import com.example.spring.cahce.model.Configuration;
+import com.fasterxml.jackson.databind.annotation.JsonTypeResolver;
 import org.hibernate.stat.Statistics;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,10 +12,11 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 public class ConfigurationRepositoryTest extends BaseTest {
@@ -86,5 +88,41 @@ public class ConfigurationRepositoryTest extends BaseTest {
 
         // THEN
         assertEquals(2, hibernateStats.getQueryExecutionCount());
+    }
+
+    @Test
+    public void testDelete() {
+        // GIVEN
+        final String configKey = UUID.randomUUID().toString();
+        final String configValue = UUID.randomUUID().toString();
+
+        // WHEN
+        final Configuration saveConfiguration = configurationRepository.save(new Configuration(configKey, configValue));
+
+        // THEN
+        assertNotNull(configurationCache.get(saveConfiguration.getId()));
+
+        // WHEN
+        configurationRepository.deleteById(saveConfiguration.getId());
+
+        // THEN
+        assertNull(configurationCache.get(saveConfiguration.getId()));
+    }
+
+    @Test
+    public void testDeleteAll() {
+        // GIVEN
+        List<Configuration> configurations = new ArrayList<>(5);
+        for (int i = 0; i < 5; i++) {
+            configurations.add(configurationRepository.save(new Configuration(UUID.randomUUID().toString(), UUID.randomUUID().toString())));
+        }
+
+        // WHEN
+        configurationRepository.deleteAll();
+
+        // THEN
+         configurations.forEach(configuration -> {
+             assertNull(configurationCache.get(configuration.getId()));
+         });
     }
 }
