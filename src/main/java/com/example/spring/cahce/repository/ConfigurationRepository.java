@@ -23,6 +23,6 @@ public interface ConfigurationRepository extends JpaRepository<Configuration, In
      * we can use unless to disable caching of data if SpEL evaluates to true. Here we are caching data unless it is null.
      * We can use same attribute in similar way with @{@link CachePut}
      */
-    @Cacheable(cacheNames = "configuration", unless = "#result == null")
+    @Cacheable(cacheNames = "configuration", unless = "#result == null", condition = "#configKey != null")
     Configuration findByConfigKey(final String configKey);
 }

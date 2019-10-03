@@ -33,6 +33,7 @@ public class ConfigurationRepositoryTest extends BaseTest {
     @Before
     public void before() {
         configurationCache = cacheManager.getCache("configuration");
+        hibernateStats.clear();
         super.beforeTest();
     }
 
@@ -62,6 +63,22 @@ public class ConfigurationRepositoryTest extends BaseTest {
 
         // WHEN
         // since caching of null value is disable, this method execution will not cache null value to cache
+        configurationRepository.findByConfigKey(configKey);
+
+        // this will again go to database since data is not cached
+        configurationRepository.findByConfigKey(configKey);
+
+        // THEN
+        assertEquals(2, hibernateStats.getQueryExecutionCount());
+    }
+
+    @Test
+    public void testFindByConfigKeyWithNullCacheKey() {
+        // GIVEN
+        final String configKey = null;
+
+        // WHEN
+        // since cache will not be checked if passed argument is null, this call skip the cache and will got to database
         configurationRepository.findByConfigKey(configKey);
 
         // this will again go to database since data is not cached
