@@ -11,6 +11,8 @@
            timeToIdleSeconds="300" timeToLiveSeconds="600"
            memoryStoreEvictionPolicy="LFU"
            transactionalMode="off">
+        <!-- Specify decorators to be applied on this cache-->
+        <cacheDecoratorFactory class="com.example.spring.cahce.ehcache.decorator.BlockingCacheCacheDecorator"/>
         <persistence strategy="localTempSwap" />
     </cache>
 
@@ -18,6 +20,8 @@
            maxEntriesLocalHeap="10000"
            eternal="true"
            transactionalMode="off">
+        <!-- Specify decorators to be applied on this cache-->
+        <cacheDecoratorFactory class="com.example.spring.cahce.ehcache.decorator.BlockingCacheCacheDecorator"/>
         <persistence strategy="localTempSwap" />
     </cache>
 
