@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import javax.cache.integration.CacheLoaderException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -48,7 +45,11 @@ public class EmployeeEntityLoaderWriter implements CacheLoaderWriter<Long, Emplo
      */
     @Override
     public Employee load(Long id) throws CacheLoaderException {
-        return employeeRepository.findById(id).get();
+        final Optional<Employee> employee = employeeRepository.findById(id);
+        if (employee.isPresent()) {
+            return employee.get();
+        }
+        return null;
     }
 
     /**
