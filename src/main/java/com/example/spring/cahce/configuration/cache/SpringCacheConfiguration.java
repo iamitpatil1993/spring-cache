@@ -2,10 +2,13 @@ package com.example.spring.cahce.configuration.cache;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +26,8 @@ import java.util.Optional;
 @Configuration
 @EnableCaching
 @Import(value = {RedisCacheProviderConfiguration.class, EhcacheCacheProviderConfiguration.class})
-public class SpringCacheConfiguration {
+// CachingConfigurerSupport/CachingConfigurer is way to configure additional details of cache abstraction
+public class SpringCacheConfiguration extends CachingConfigurerSupport {
 
     /**
      * Conditionally declares bean in application context.
@@ -70,5 +74,20 @@ public class SpringCacheConfiguration {
     @Conditional(value = NoOpCacheConditon.class)
     public CacheManager noOpCacheManager() {
         return new NoOpCacheManager();
+    }
+
+    /**
+     * Override and provide {@link CacheErrorHandler}. Class need not to be bean.
+     * Best thing about {@link CachingConfigurerSupport}, we do need to implement {@link org.springframework.cache.annotation.CachingConfigurer}
+     * We can override only those methods which we want to configure.
+     * If we do not override method or retun null from overriden method, spring will use default Config for that method.
+     * For example, if we return null for {@link CachingConfigurer#cacheResolver()} spring will apply default.
+     * For example, if we return null for {@link CachingConfigurer#cacheResolver()} spring will apply default.
+     *
+     * @return Custom {@link CacheErrorHandler} implementation
+     */
+    @Override
+    public CacheErrorHandler errorHandler() {
+        return new DefaultCacheErrorHandler();
     }
 }
