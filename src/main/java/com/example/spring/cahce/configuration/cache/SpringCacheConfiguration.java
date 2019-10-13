@@ -9,6 +9,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -89,5 +91,31 @@ public class SpringCacheConfiguration extends CachingConfigurerSupport {
     @Override
     public CacheErrorHandler errorHandler() {
         return new DefaultCacheErrorHandler();
+    }
+
+    /**
+     * This is how we can define our custom {@link KeyGenerator}
+     * Since, {@link KeyGenerator} is functional interface, we can define it inline.
+     * @return Custom implementation of {@link KeyGenerator}
+     */
+    @Override
+    public KeyGenerator keyGenerator() {
+        // Just disabling this custom key generator, so just return null from this method spring will apply default
+        // KeyGenerator, org.springframework.cache.interceptor.SimpleKeyGenerator
+        if (true) {
+            return null;
+        }
+        return (Object target, Method method, Object... params) -> {
+            final StringBuilder keyBuilder = new StringBuilder(target.getClass().getName());
+            keyBuilder.append("_").append(method.getName());
+
+            for (int i = 0; i < params.length; i++) {
+                final Object value = params[i];
+                if (value != null) {
+                    keyBuilder.append("_").append(params[i].toString());
+                }
+            }
+            return keyBuilder.toString();
+        };
     }
 }
