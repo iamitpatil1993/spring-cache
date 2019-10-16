@@ -1,12 +1,22 @@
 package com.example.spring.cahce.repository;
 
 import com.example.spring.cahce.model.Configuration;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ConfigurationRepository extends JpaRepository<Configuration, Long> {
+import java.util.Optional;
+
+/**
+ * We can pull common configuration at class level using {@link CacheConfig} annotation.
+ * NOTE: We can still override these configuration at method level. Also, this annotation do not enable caching for
+ * method not annotated with any cache related annotation, we still need to add method level appropriate cache
+ * annotation.
+ */
+@CacheConfig(cacheNames = "configuration")
+public interface ConfigurationRepository extends JpaRepository<Configuration, Long>, CustomConfigurationRepository {
 
     /**
      * we can override method declaration in {@link JpaRepository} and enable caching for that method.
@@ -17,21 +27,21 @@ public interface ConfigurationRepository extends JpaRepository<Configuration, Lo
      * @CachePut can be used to load data in cache in advance before it's use.
      */
     @Override
-    @CachePut(cacheNames = "configuration", key = "#result.id")
+    @CachePut(key = "#result.id")
     Configuration save(final Configuration entity);
 
     /**
      * we can use unless to disable caching of data if SpEL evaluates to true. Here we are caching data unless it is null.
      * We can use same attribute in similar way with @{@link CachePut}
      */
-    @Cacheable(cacheNames = "configuration", unless = "#result == null", condition = "#configKey != null")
+    @Cacheable(unless = "#result == null", condition = "#configKey != null")
     Configuration findByConfigKey(final String configKey);
 
     /**
      * {@link CacheEvict} can be used to remove entry from cache if  already exists.
      */
     @Override
-    @CacheEvict(cacheNames = "configuration")
+    @CacheEvict
     void deleteById(Long id);
 
     /**
@@ -41,6 +51,10 @@ public interface ConfigurationRepository extends JpaRepository<Configuration, Lo
      * 2. We update all entries of that type from database/dataSource and from cache.
      */
     @Override
-    @CacheEvict(cacheNames = "configuration", allEntries = true)
+    @CacheEvict(allEntries = true)
     void deleteAll();
+
+    @Override
+    @Cacheable
+    Optional<Configuration> findById(Long aLong);
 }
