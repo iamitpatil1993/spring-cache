@@ -125,4 +125,23 @@ public class ConfigurationRepositoryTest extends BaseTest {
              assertNull(configurationCache.get(configuration.getId()));
          });
     }
+
+    @Test
+    public void testCustomSave() {
+
+        // GIVEN
+        final String key = UUID.randomUUID().toString();
+        final String value = UUID.randomUUID().toString();
+
+        final Configuration configuration = new Configuration();
+        configuration.setConfigKey(key);
+        configuration.setConfigValue(value);
+
+        // WHEN
+        final Configuration savedConfiguration = configurationRepository.customSave(configuration);
+
+        // THEN
+        // since we have used @CachePut, data will get cached when save method completes
+        assertNotNull(configurationCache.get(savedConfiguration.getId(), Configuration.class));
+    }
 }
