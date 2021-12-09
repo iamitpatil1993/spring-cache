@@ -18,7 +18,7 @@
         <java.version>11</java.version>
         <lettuce.version>5.1.7.RELEASE</lettuce.version>
         <spring-data-version>Lovelace-SR9</spring-data-version>
-        <jackson.version>2.9.9</jackson.version>
+        <jackson.version>2.9.10.8</jackson.version>
         <postgresql.version>42.2.6</postgresql.version>
         <mysql-connector-java.version>8.0.16</mysql-connector-java.version>
         <datasource.hikaricp.version>3.3.1</datasource.hikaricp.version>
